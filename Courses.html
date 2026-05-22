@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الكورسات - Smart Course Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --oxford-blue:  #192338;
+            --space-cadet:  #1E2E4F;
+            --ylnmn-blue:   #31487A;
+            --jordy-blue:   #8FB3E2;
+            --lavender:     #D9E1F1;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--lavender);
+            color: var(--oxford-blue);
+            overflow-x: hidden;
+        }
+
+        /* ===== NAVBAR (identical to landing) ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            z-index: 1000;
+            background: transparent;
+            transition: all 0.35s ease;
+        }
+
+        .navbar.scrolled {
+            background: var(--oxford-blue);
+            box-shadow: 0 4px 24px rgba(25,35,56,0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo { display: flex; align-items: center; text-decoration: none; }
+
+        .logo img {
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--jordy-blue);
+            box-shadow: 0 0 12px rgba(143,179,226,0.35);
+            transition: transform 0.3s;
+        }
+
+        .logo img:hover { transform: scale(1.08); }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+
+        .nav-links a {
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 700;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active { color: var(--jordy-blue); }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; right: 0;
+            width: 100%; height: 2px;
+            background: var(--ylnmn-blue);
+            border-radius: 2px;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+
+        .btn-login {
+            padding: 11px 30px;
+            border: 2px solid #ffffff;
+            background: transparent;
+            color: #ffffff;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .btn-login:hover {
+            background: #ffffff;
+            color: var(--oxford-blue);
+            text-shadow: none;
+        }
+
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+        .hamburger span { width: 28px; height: 3px; background: var(--lavender); border-radius: 2px; }
+
+        /* ===== HERO SLIDER ===== */
+        .hero-slider {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0;
+            transition: opacity 0.9s ease;
+            z-index: 0;
+        }
+
+        .slide.active { opacity: 1; z-index: 1; }
+
+        /* slide backgrounds – swap with real images */
+        .slide-1 { background-image: url('./images/686404381_969495909001050_2016672514181493694_n.jpg'); }
+        .slide-2 { background-image: url('./images/561897454_816091161008193_635238836408737051_n.jpg'); }
+        .slide-3 { background-image: url('./images/514364855_122236256456218676_5872549431653263721_n.jpg'); }
+
+        .slide-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(25,35,56,0.15) 0%, rgba(30,46,79,0.15) 100%);
+            z-index: 2;
+        }
+
+        .hero-content {
+            position: absolute; inset: 0;
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 40px;
+        }
+
+        .hero-content h1 {
+            color: #ffffff;
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 16px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .hero-content h1 span { color: var(--jordy-blue); }
+
+        .hero-content p {
+            color: #d0dcf0;
+            font-size: 19px;
+            line-height: 1.8;
+            max-width: 620px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+        }
+
+        /* Slider dots */
+        .slider-dots {
+            position: absolute;
+            bottom: 32px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            display: flex;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 12px; height: 12px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            border: 2px solid rgba(255,255,255,0.6);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--jordy-blue);
+            border-color: var(--jordy-blue);
+            transform: scale(1.25);
+        }
+
+        /* Slider arrows */
+        .slider-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 4;
+            width: 46px; height: 46px;
+            background: rgba(255,255,255,0.15);
+            border: 2px solid rgba(255,255,255,0.5);
+            border-radius: 50%;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .slider-arrow:hover {
+            background: var(--ylnmn-blue);
+            border-color: var(--ylnmn-blue);
+        }
+
+        .arrow-prev { right: 28px; }
+        .arrow-next { left: 28px; }
+
+        /* ===== SEARCH & FILTER ===== */
+        .search-filter {
+            background: var(--space-cadet);
+            padding: 22px 60px;
+            position: sticky;
+            top: 80px;
+            z-index: 100;
+            box-shadow: 0 4px 16px rgba(25,35,56,0.25);
+        }
+
+        .search-filter-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .search-box { flex: 2; position: relative; }
+
+        .search-box input {
+            width: 100%;
+            height: 46px;
+            padding: 0 16px 0 46px;
+            border: 1.5px solid rgba(143,179,226,0.3);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            background: var(--oxford-blue);
+            color: var(--lavender);
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        .search-box input::placeholder { color: var(--jordy-blue); }
+
+        .search-box input:focus {
+            border-color: var(--jordy-blue);
+            box-shadow: 0 0 0 3px rgba(143,179,226,0.15);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            font-size: 17px;
+        }
+
+        .filter-select {
+            flex: 1;
+            height: 46px;
+            padding: 0 14px;
+            border: 1.5px solid rgba(143,179,226,0.3);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            background: var(--oxford-blue);
+            color: var(--lavender);
+            cursor: pointer;
+            outline: none;
+        }
+
+        .btn-reset {
+            padding: 11px 22px;
+            background: transparent;
+            border: 2px solid var(--jordy-blue);
+            color: var(--jordy-blue);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-reset:hover {
+            background: var(--jordy-blue);
+            color: var(--oxford-blue);
+        }
+
+        /* ===== COURSES SECTION ===== */
+        .courses-section {
+            padding: 60px 60px 30px;
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid rgba(143,179,226,0.25);
+        }
+
+        .section-title h2 {
+            color: var(--oxford-blue);
+            font-size: 26px;
+            font-weight: 800;
+        }
+
+        .center-badge-large {
+            background: var(--ylnmn-blue);
+            color: var(--lavender);
+            padding: 6px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 22px;
+            margin-bottom: 60px;
+        }
+
+        /* ===== COURSE CARD ===== */
+        .course-card {
+            background: white;
+            border-radius: 18px;
+            overflow: hidden;
+            border: 2px solid rgba(143,179,226,0.2);
+            transition: all 0.35s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(25,35,56,0.15);
+            border-color: var(--ylnmn-blue);
+        }
+
+        .course-image {
+            height: 160px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--space-cadet);
+            position: relative;
+        }
+
+        .course-image-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(25,35,56,0.2), rgba(25,35,56,0.65));
+        }
+
+        .course-center-badge {
+            position: absolute;
+            top: 10px; right: 10px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            z-index: 2;
+        }
+
+        .badge-uicc { background: var(--ylnmn-blue); color: var(--lavender); }
+        .badge-uccd { background: var(--space-cadet); color: var(--lavender); }
+
+        .course-content { padding: 18px; }
+
+        .course-content h3 {
+            color: var(--oxford-blue);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .course-duration {
+            color: var(--ylnmn-blue);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .seat-indicator { margin-bottom: 14px; }
+
+        .seat-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .seat-text { color: var(--ylnmn-blue); font-size: 13px; font-weight: 600; }
+        .seat-number { color: var(--oxford-blue); font-size: 14px; font-weight: 800; }
+
+        .seat-bar {
+            height: 8px;
+            background: var(--lavender);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .seat-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+        .fill-available { background: var(--ylnmn-blue); }
+        .fill-warning   { background: #e09000; }
+        .fill-full      { background: #c0392b; }
+
+        .seat-status { margin-top: 5px; font-size: 12px; font-weight: 700; }
+        .status-available { color: var(--ylnmn-blue); }
+        .status-warning   { color: #e09000; }
+        .status-full      { color: #c0392b; }
+
+        .btn-course {
+            display: block;
+            width: 100%;
+            padding: 11px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-details {
+            background: var(--space-cadet);
+            color: var(--lavender);
+        }
+
+        .btn-details:hover {
+            background: var(--oxford-blue);
+            transform: scale(1.02);
+        }
+
+        .btn-full {
+            background: rgba(192,57,43,0.15);
+            color: #c0392b;
+            border: 1.5px solid #c0392b;
+            cursor: not-allowed;
+            opacity: 0.75;
+        }
+
+        /* ===== NOT FOUND ===== */
+        .not-found {
+            text-align: center;
+            padding: 80px 20px;
+            display: none;
+        }
+
+        .not-found.show { display: block; }
+
+        .not-found-icon { font-size: 70px; margin-bottom: 20px; }
+
+        .not-found h3 { color: var(--oxford-blue); font-size: 24px; font-weight: 700; margin-bottom: 10px; }
+        .not-found p  { color: var(--ylnmn-blue); font-size: 16px; }
+
+        /* ===== SCROLL TO TOP ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 36px; left: 36px;
+            width: 50px; height: 50px;
+            background: var(--ylnmn-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(49,72,122,0.45);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.35s, transform 0.35s, background 0.3s;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .scroll-top:hover {
+            background: var(--jordy-blue);
+            color: var(--oxford-blue);
+            transform: translateY(-4px);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: var(--oxford-blue);
+            padding: 60px 60px 30px;
+            border-top: 1px solid rgba(143,179,226,0.15);
+            margin-top: 40px;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h4 { color: var(--lavender); font-size: 16px; font-weight: 700; margin-bottom: 20px; }
+
+        .footer-column a {
+            display: block;
+            color: var(--jordy-blue);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover { color: var(--lavender); }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 28px;
+            border-top: 1px solid rgba(143,179,226,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-bottom p { color: var(--jordy-blue); font-size: 14px; }
+
+        .footer-bottom a {
+            color: var(--jordy-blue);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .footer-bottom a:hover { color: var(--lavender); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1100px) {
+            .courses-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 992px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+            .hero-content h1 { font-size: 38px; }
+            .search-filter-container { flex-direction: column; }
+            .footer-content { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 576px) {
+            .navbar { padding: 0 20px; }
+            .search-filter { padding: 18px 20px; top: 80px; }
+            .courses-section { padding: 40px 20px 20px; }
+            .courses-grid { grid-template-columns: 1fr; }
+            .hero-content h1 { font-size: 28px; }
+            .footer { padding: 40px 20px 20px; }
+            .footer-content { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="./index.html" class="logo">
+            <img src="./images/Logo.jpeg" alt="شعار الجامعة">
+        </a>
+        <ul class="nav-links">
+            <li><a href="./index.html">الرئيسية</a></li>
+            <li><a href="./Courses.html" class="active">الكورسات</a></li>
+            <li><a href="index.html#contact">تواصل معنا</a></li>
+        </ul>
+        <div class="nav-right">
+            <a href="./Login.html" class="btn-login">تسجيل الدخول</a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SLIDER -->
+    <div class="hero-slider" id="heroSlider">
+        <div class="slide slide-1 active"></div>
+        <div class="slide slide-2"></div>
+        <div class="slide slide-3"></div>
+        <div class="slide-overlay"></div>
+
+        <div class="hero-content">
+            <h1>استكشف <span>الكورسات</span></h1>
+            <p>ابحث عن الكورس المناسب لك في مراكز UICC وUCCD بجامعة بني سويف التكنولوجية</p>
+        </div>
+
+        <button class="slider-arrow arrow-prev" onclick="changeSlide(1)">‹</button>
+        <button class="slider-arrow arrow-next" onclick="changeSlide(-1)">›</button>
+
+        <div class="slider-dots">
+            <div class="dot active" onclick="goToSlide(0)"></div>
+            <div class="dot" onclick="goToSlide(1)"></div>
+            <div class="dot" onclick="goToSlide(2)"></div>
+        </div>
+    </div>
+
+    <!-- SEARCH & FILTER -->
+    <section class="search-filter">
+        <div class="search-filter-container">
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="searchInput" placeholder="ابحث باسم الكورس...">
+            </div>
+            <select class="filter-select" id="centerFilter">
+                <option value="all">كل المراكز</option>
+                <option value="uicc">UICC</option>
+                <option value="uccd">UCCD</option>
+            </select>
+            <select class="filter-select" id="statusFilter">
+                <option value="all">كل الكورسات</option>
+                <option value="available">متاح</option>
+                <option value="full">ممتلئ</option>
+            </select>
+            <button class="btn-reset" onclick="resetFilters()">مسح الفلاتر</button>
+        </div>
+    </section>
+
+    <!-- UICC COURSES -->
+    <section class="courses-section">
+        <div class="section-title">
+            <h2>كورسات UICC</h2>
+            <span class="center-badge-large">UICC</span>
+        </div>
+        <div class="courses-grid" id="uiccCourses">
+
+            <div class="course-card" data-center="uicc" data-name="Python Programming" data-status="available">
+                <div class="course-image" style="background-image:url('./images/python.jpeg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uicc">UICC</span>
+                </div>
+                <div class="course-content">
+                    <h3>Python Programming</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">18/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-available" style="width:72%"></div></div>
+                        <div class="seat-status status-available">متاح</div>
+                    </div>
+                    <a href="./python-details.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uicc" data-name="Microsoft Office" data-status="available">
+                <div class="course-image" style="background-image:url('./images/MS\ Office.jpg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uicc">UICC</span>
+                </div>
+                <div class="course-content">
+                    <h3>Microsoft Office</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">22/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-warning" style="width:88%"></div></div>
+                        <div class="seat-status status-warning">⚠️ بقيت 3 مقاعد!</div>
+                    </div>
+                    <a href="./MS-details.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uicc" data-name="Photoshop Course" data-status="available">
+                <div class="course-image" style="background-image:url('./images/Photoshop.jpg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uicc">UICC</span>
+                </div>
+                <div class="course-content">
+                    <h3>Photoshop Course</h3>
+                    <div class="course-duration">⏱️ 4 أسابيع</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">15/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-available" style="width:60%"></div></div>
+                        <div class="seat-status status-available">متاح</div>
+                    </div>
+                    <a href="./Photoshop.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uicc" data-name="Korean Language" data-status="full">
+                <div class="course-image" style="background-image:url('./images/Korean.jpg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uicc">UICC</span>
+                </div>
+                <div class="course-content">
+                    <h3>Korean Language</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">25/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-full" style="width:100%"></div></div>
+                        <div class="seat-status status-full">❌ ممتلئ</div>
+                    </div>
+                    <button class="btn-course btn-full" disabled>ممتلئ</button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- UCCD COURSES -->
+    <section class="courses-section">
+        <div class="section-title">
+            <h2>كورسات UCCD</h2>
+            <span class="center-badge-large" style="background:var(--space-cadet)">UCCD</span>
+        </div>
+        <div class="courses-grid" id="uccdCourses">
+
+            <div class="course-card" data-center="uccd" data-name="Softskills Workshop" data-status="available">
+                <div class="course-image" style="background-image:url('./images/SoftSkills.jpg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uccd">UCCD</span>
+                </div>
+                <div class="course-content">
+                    <h3>Softskills Workshop</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">10/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-available" style="width:40%"></div></div>
+                        <div class="seat-status status-available">متاح</div>
+                    </div>
+                    <a href="./Softskills-details.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uccd" data-name="Resume Writing Workshop" data-status="available">
+                <div class="course-image" style="background-image:url('./images/Resume.jpg')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uccd">UCCD</span>
+                </div>
+                <div class="course-content">
+                    <h3>Resume Writing Workshop</h3>
+                    <div class="course-duration">⏱️ 4 أسابيع</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">8/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-available" style="width:32%"></div></div>
+                        <div class="seat-status status-available">متاح</div>
+                    </div>
+                    <a href="./Resume-detail.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uccd" data-name="Interviewing Workshop" data-status="full">
+                <div class="course-image" style="background-image:url('./images/Interviewing\ Workshop.png')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uccd">UCCD</span>
+                </div>
+                <div class="course-content">
+                    <h3>Interviewing Workshop</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">25/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-full" style="width:100%"></div></div>
+                        <div class="seat-status status-full">❌ ممتلئ</div>
+                    </div>
+                    <button class="btn-course btn-full" disabled>ممتلئ</button>
+                </div>
+            </div>
+
+            <div class="course-card" data-center="uccd" data-name="Career Planning Workshop" data-status="available">
+                <div class="course-image" style="background-image:url('./images/Career\ plannning.png')">
+                    <div class="course-image-overlay"></div>
+                    <span class="course-center-badge badge-uccd">UCCD</span>
+                </div>
+                <div class="course-content">
+                    <h3>Career Planning Workshop</h3>
+                    <div class="course-duration">⏱️ أسبوعان</div>
+                    <div class="seat-indicator">
+                        <div class="seat-label">
+                            <span class="seat-text">المقاعد المتاحة</span>
+                            <span class="seat-number">14/25</span>
+                        </div>
+                        <div class="seat-bar"><div class="seat-fill fill-available" style="width:56%"></div></div>
+                        <div class="seat-status status-available">متاح</div>
+                    </div>
+                    <a href="./Career-details.html" class="btn-course btn-details">تفاصيل</a>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- NOT FOUND -->
+    <div class="not-found" id="notFound">
+        <div class="not-found-icon">🔍</div>
+        <h3>لا توجد نتائج</h3>
+        <p>جرب تغيير كلمة البحث أو الفلاتر</p>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>روابط سريعة</h4>
+                <a href="index.html">الرئيسية</a>
+                <a href="courses.html">الكورسات</a>
+                <a href="index.html#contact">تواصل معنا</a>
+                <a href="Login.html">تسجيل الدخول</a>
+            </div>
+            <div class="footer-column">
+                <h4>تواصل معنا</h4>
+                <a href="#">جامعة بني سويف التكنولوجية</a>
+                <a href="#">support@bsu.edu.eg</a>
+                <a href="#">+20 123 456 7890</a>
+            </div>
+            <div class="footer-column">
+                <h4>المساعدة</h4>
+                <a href="#">الأسئلة الشائعة</a>
+                <a href="#">سياسة الخصوصية</a>
+                <a href="#">شروط الاستخدام</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Beni Suef Technological University. All rights reserved.</p>
+            <div>
+                <a href="#">سياسة الخصوصية</a> | <a href="#">شروط الاستخدام</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCROLL TO TOP -->
+    <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <script>
+        /* ── Navbar scroll ── */
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+            document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 300);
+        });
+
+        /* ── Mobile menu ── */
+        function toggleMenu() {
+            const nl = document.querySelector('.nav-links');
+            nl.style.display = nl.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        /* ── Hero Slider ── */
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const dots   = document.querySelectorAll('.dot');
+        let autoTimer;
+
+        function goToSlide(n) {
+            slides[currentSlide].classList.remove('active');
+            dots[currentSlide].classList.remove('active');
+            currentSlide = (n + slides.length) % slides.length;
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+        }
+
+        function changeSlide(dir) {
+            clearInterval(autoTimer);
+            goToSlide(currentSlide + dir);
+            startAuto();
+        }
+
+        function startAuto() {
+            autoTimer = setInterval(() => goToSlide(currentSlide + 1), 4500);
+        }
+
+        startAuto();
+
+        /* ── Search / Filter ── */
+        const searchInput  = document.getElementById('searchInput');
+        const centerFilter = document.getElementById('centerFilter');
+        const statusFilter = document.getElementById('statusFilter');
+        const allCards     = document.querySelectorAll('.course-card');
+        const notFound     = document.getElementById('notFound');
+
+        function filterCourses() {
+            const q = searchInput.value.toLowerCase();
+            const c = centerFilter.value;
+            const s = statusFilter.value;
+            let visible = 0;
+
+            allCards.forEach(card => {
+                const ok =
+                    card.dataset.name.toLowerCase().includes(q) &&
+                    (c === 'all' || card.dataset.center === c) &&
+                    (s === 'all' || card.dataset.status === s);
+                card.style.display = ok ? '' : 'none';
+                if (ok) visible++;
+            });
+
+            notFound.classList.toggle('show', visible === 0);
+        }
+
+        function resetFilters() {
+            searchInput.value = '';
+            centerFilter.value = 'all';
+            statusFilter.value = 'all';
+            filterCourses();
+        }
+
+        searchInput.addEventListener('input', filterCourses);
+        centerFilter.addEventListener('change', filterCourses);
+        statusFilter.addEventListener('change', filterCourses);
+    </script>
+</body>
+</html>

@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نموذج التسجيل - Smart Course Booking</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --oxford-blue:  #192338;
+            --space-cadet:  #1E2E4F;
+            --ylnmn-blue:   #31487A;
+            --jordy-blue:   #8FB3E2;
+            --lavender:     #D9E1F1;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--lavender);
+            color: var(--oxford-blue);
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            z-index: 1000;
+            background: var(--oxford-blue);
+            box-shadow: 0 4px 24px rgba(25,35,56,0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo { display: flex; align-items: center; text-decoration: none; }
+
+        .logo img {
+            width: 54px; height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--jordy-blue);
+            box-shadow: 0 0 12px rgba(143,179,226,0.35);
+            transition: transform 0.3s;
+        }
+
+        .logo img:hover { transform: scale(1.08); }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+
+        .nav-links a {
+            color: #ffffff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            text-decoration: none;
+            font-size: 17px;
+            font-weight: 700;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active { color: var(--jordy-blue); }
+
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+
+        .btn-login {
+            padding: 11px 30px;
+            border: 2px solid #ffffff;
+            background: transparent;
+            color: #ffffff;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+
+        /* ===== FORM CONTAINER ===== */
+        .form-container {
+            max-width: 800px;
+            margin: 120px auto 60px;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 15px 40px rgba(25,35,56,0.15);
+            border: 2px solid rgba(143,179,226,0.2);
+        }
+
+        .form-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-header h1 {
+            color: var(--oxford-blue);
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 16px;
+        }
+
+        .course-info {
+            background: var(--lavender);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .course-center {
+            color: var(--ylnmn-blue);
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* ===== FORM STYLES ===== */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        label {
+            display: block;
+            color: var(--ylnmn-blue);
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: #c0392b;
+            margin-right: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid rgba(143,179,226,0.3);
+            border-radius: 10px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px;
+            background: var(--lavender);
+            color: var(--oxford-blue);
+            outline: none;
+            transition: all 0.3s;
+        }
+ .footer {
+            background: var(--oxford-blue);
+            padding: 60px 60px 30px;
+            border-top: 1px solid rgba(143,179,226,0.15);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-column h4 {
+            color: var(--lavender);
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-column a {
+            display: block;
+            color: var(--jordy-blue);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 12px;
+            transition: color 0.3s;
+        }
+
+        .footer-column a:hover { color: var(--lavender); }
+
+        .footer-bottom {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding-top: 28px;
+            border-top: 1px solid rgba(143,179,226,0.15);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-bottom p { color: var(--jordy-blue); font-size: 14px; }
+
+        .footer-bottom a {
+            color: var(--jordy-blue);
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.3s;
+        }
+
+        .footer-bottom a:hover { color: var(--lavender); }
+
+        
+        /* ===== BUTTONS ===== */
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            background: var(--ylnmn-blue);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        /* ===== SCROLL TO TOP ===== */
+        .scroll-top {
+            position: fixed;
+            bottom: 36px;
+            left: 36px;
+            width: 50px;
+            height: 50px;
+            background: var(--ylnmn-blue);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 20px rgba(49,72,122,0.45);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.35s, transform 0.35s, background 0.3s;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        .scroll-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+
+        .scroll-top:hover {
+            background: var(--jordy-blue);
+            color: var(--oxford-blue);
+            transform: translateY(-4px);
+        }
+
+
+        .btn-submit:hover { background: var(--oxford-blue); transform: translateY(-2px); }
+
+        /* @media (max-width: 992px) {
+            .nav-links { display: none; }
+            .form-row { grid-template-columns: 1fr; }
+        
+        }
+        @media (max-width: 576px) {
+            .navbar { padding: 0 20px; }
+            .hero { padding: 100px 20px 60px; }
+            .hero h1 { font-size: 30px; }
+            .hero-buttons { flex-direction: column; align-items: center; }
+            .centers-section, .about, .contact-section { padding: 60px 20px; }
+            .footer { padding: 40px 20px 20px; }
+            .footer-content { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+            .form-row { grid-template-columns: 1fr; }
+            .about-shared-icons { gap: 20px; }
+        } */
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <a href="index.html" class="logo">
+            <img src="./images/Logo.jpeg" alt="UICC Logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="./index.html">الرئيسية</a></li>
+            <li><a href="./Courses.html">الكورسات</a></li>
+            <li><a href="./Mybooking.html">حجوزاتي</a></li>
+            <li><a href="index.html#contact">تواصل معنا</a></li>
+        </ul>
+        <div class="nav-right">
+            <a href="./Login.html" class="btn-login">تسجيل الدخول</a>
+        </div>
+    </nav>
+
+    <!-- FORM CONTAINER -->
+    <div class="form-container">
+        <div class="form-card">
+            <div class="form-header">
+                <h1>نموذج تسجيل الكورس</h1>
+                <p style="color: var(--ylnmn-blue); font-size: 16px;">املأ البيانات المطلوبة لإتمام عملية الحجز في UICC</p>
+            </div>
+
+            <div class="course-info">
+                <div class="course-center">مركز UICC </div>
+            </div>
+
+            <form id="bookingForm">
+                <!-- Dropdown لاختيار الكورس -->
+                <div class="form-group">
+                    <label for="courseSelect">
+                        <span class="required">*</span> اختر الكورس الذي ترغب في حجزه
+                    </label>
+                    <select id="courseSelect" name="course" required>
+                        <option value="">-- اختر من الكورسات المتاحة --</option>
+                        <option value="python">Python Programming</option>
+                        <option value="icdl">Photoshop Course</option>
+                        <option value="graphic">Microsoft Office</option>
+                      
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName"><span class="required">*</span>الاسم الأول</label>
+                        <input type="text" id="firstName" name="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName"><span class="required">*</span>الاسم الأخير</label>
+                        <input type="text" id="lastName" name="lastName" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="email"><span class="required">*</span>البريد الإلكتروني</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="phone"><span class="required">*</span>رقم الهاتف</label>
+                        <input type="tel" id="phone" name="phone" pattern="[0-9]{11}" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="studentId"><span class="required">*</span>الرقم الجامعي</label>
+                        <input type="text" id="studentId" name="studentId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="academicYear"><span class="required">*</span>الفرقة الدراسية</label>
+                        <select id="academicYear" name="academicYear" required>
+                            <option value="">اختر الفرقة</option>
+                            <option value="1">الفرقة الأولى</option>
+                            <option value="2">الفرقة الثانية</option>
+                            <option value="3">الفرقة الثالثة</option>
+                            <option value="4">الفرقة الرابعة</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="motivation">لماذا ترغب في الانضمام لهذا الكورس؟ (اختياري)</label>
+                    <textarea id="motivation" name="motivation"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="terms" name="terms" required style="width: auto; margin-left: 8px;">
+                        أوافق على الشروط والأحكام
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-submit">إرسال الطلب</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-column">
+                <h4>روابط سريعة</h4>
+                <a href="index.html">الرئيسية</a>
+                <a href="courses.html">الكورسات</a>
+                <a href="#contact">تواصل معنا</a>
+                <a href="Login.html">تسجيل الدخول</a>
+            </div>
+            <div class="footer-column">
+                <h4>المراكز</h4>
+                <a href="courses.html?center=uicc">UICC - ربط الجامعة بالصناعة</a>
+                <a href="courses.html?center=uccd">UCCD - التطوير المهني</a>
+            </div>
+            <div class="footer-column">
+                <h4>تواصل معنا</h4>
+                <a href="#">جامعة بني سويف التكنولوجية</a>
+                <a href="#">support@btu.edu.eg</a>
+                <a href="#">+20 123 456 7890</a>
+            </div>
+            <div class="footer-column">
+                <h4>المساعدة</h4>
+                <a href="#">الأسئلة الشائعة</a>
+                <a href="#">سياسة الخصوصية</a>
+                <a href="#">شروط الاستخدام</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2026 Beni Suef Technological University. All rights reserved.</p>
+            <div>
+                <a href="#">سياسة الخصوصية</a> | <a href="#">شروط الاستخدام</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCROLL TO TOP -->
+    <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <script>
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            navbar.classList.toggle('scrolled', window.scrollY > 50);
+
+            const scrollTop = document.getElementById('scrollTop');
+            scrollTop.classList.toggle('visible', window.scrollY > 300);
+        });
+
+        // Scroll reveal
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.15 });
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        function toggleMenu() {
+            const navLinks = document.querySelector('.nav-links');
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function sendMessage() {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('message').value.trim();
+            if (!name || !email || !message) {
+                alert('من فضلك اكمل جميع الحقول المطلوبة');
+                return;
+            }
+            document.getElementById('successMsg').style.display = 'block';
+            document.getElementById('name').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('subject').value = '';
+            document.getElementById('message').value = '';
+        }
+    </script>
+</body>
+</html>
+</body>
+</html>
