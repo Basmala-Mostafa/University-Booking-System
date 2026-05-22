@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول | نظام حجز الكورسات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --oxford-blue:  #192338;
+            --space-cadet:  #1E2E4F;
+            --ylnmn-blue:   #31487A;
+            --jordy-blue:   #8FB3E2;
+            --lavender:     #D9E1F1;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--oxford-blue);
+            color: var(--oxford-blue);
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            position: fixed;
+            top: 0; width: 100%; height: 80px;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0 60px;
+            z-index: 1000;
+            background: transparent;
+            transition: all 0.35s ease;
+        }
+
+        .navbar.scrolled {
+            background: var(--oxford-blue);
+            box-shadow: 0 4px 24px rgba(25,35,56,0.5);
+            backdrop-filter: blur(12px);
+        }
+
+        .logo { display: flex; align-items: center; text-decoration: none; }
+
+        .logo img {
+            width: 54px; height: 54px;
+            border-radius: 50%; object-fit: cover;
+            border: 2px solid var(--jordy-blue);
+            box-shadow: 0 0 12px rgba(143,179,226,0.35);
+            transition: transform 0.3s;
+        }
+
+        .logo img:hover { transform: scale(1.08); }
+
+        .nav-links { display: flex; gap: 40px; list-style: none; }
+
+        .nav-links a {
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            text-decoration: none;
+            font-size: 17px; font-weight: 700;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active { color: var(--jordy-blue); }
+
+        .nav-links a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -6px; right: 0;
+            width: 100%; height: 2px;
+            background: var(--ylnmn-blue);
+            border-radius: 2px;
+        }
+
+        .nav-right { display: flex; align-items: center; gap: 20px; }
+
+        .btn-login-nav {
+            padding: 11px 30px;
+            border: 2px solid #fff;
+            background: transparent; color: #fff;
+            border-radius: 8px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700; font-size: 15px;
+            cursor: pointer; transition: all 0.3s;
+            text-decoration: none;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        }
+
+        .btn-login-nav:hover { background: #fff; color: var(--oxford-blue); text-shadow: none; }
+
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; }
+        .hamburger span { width: 28px; height: 3px; background: var(--lavender); border-radius: 2px; }
+
+        /* ===== PAGE LAYOUT ===== */
+        .page-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            align-items: stretch;
+            min-height: 100vh;
+        }
+
+        .page-bg {
+            position: absolute; inset: 0;
+            background-image: url('./images/Heroimage.png');
+            background-size: cover; background-position: center;
+            z-index: 0;
+        }
+
+        .page-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to left, rgba(25,35,56,0.30) 0%, rgba(25,35,56,0.48) 55%, rgba(25,35,56,0.62) 100%);
+            z-index: 1;
+        }
+
+        .page-left {
+            flex: 1; position: relative; z-index: 2;
+            display: flex; flex-direction: column; justify-content: center;
+            padding: 120px 60px 80px 80px;
+        }
+
+        .page-left h1 {
+            color: #fff; font-size: 46px; font-weight: 800;
+            line-height: 1.35; margin-bottom: 18px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+        }
+
+        .page-left h1 span { color: var(--jordy-blue); }
+
+        .page-left p {
+            color: #c8d8ef; font-size: 17px; line-height: 1.85;
+            max-width: 420px;
+            text-shadow: 0 1px 6px rgba(0,0,0,0.3);
+        }
+
+        .page-left .badges { display: flex; gap: 14px; margin-top: 36px; flex-wrap: wrap; }
+
+        .badge-pill {
+            display: flex; align-items: center; gap: 8px;
+            background: rgba(143,179,226,0.18);
+            border: 1px solid rgba(143,179,226,0.4);
+            backdrop-filter: blur(8px);
+            padding: 9px 18px; border-radius: 50px;
+            color: var(--lavender); font-size: 14px; font-weight: 600;
+        }
+
+        .page-right {
+            width: 460px; flex-shrink: 0;
+            position: relative; z-index: 2;
+            display: flex; align-items: center; justify-content: center;
+            padding: 100px 50px 60px 30px;
+        }
+
+        /* ===== LOGIN CARD ===== */
+        .login-card {
+            width: 100%;
+            background: rgba(255,255,255,0.97);
+            border-radius: 24px;
+            padding: 40px 38px;
+            box-shadow: 0 24px 60px rgba(25,35,56,0.4);
+        }
+
+        .login-card h2 {
+            text-align: center;
+            color: var(--oxford-blue);
+            font-size: 26px; font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .login-card .subtitle {
+            text-align: center;
+            color: var(--ylnmn-blue);
+            font-size: 14px; margin-bottom: 28px;
+        }
+
+        /* ===== DROPDOWN ROLE ===== */
+        .role-group { margin-bottom: 22px; }
+
+        .role-group label {
+            display: block; font-size: 14px; font-weight: 700;
+            color: var(--space-cadet); margin-bottom: 7px;
+        }
+
+        .custom-select-wrapper { position: relative; }
+
+        .custom-select-wrapper select {
+            width: 100%;
+            padding: 13px 46px 13px 16px;
+            border: 1.5px solid rgba(49,72,122,0.25);
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 15px; font-weight: 700;
+            color: var(--oxford-blue);
+            background: var(--lavender);
+            outline: none;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .custom-select-wrapper select:focus {
+            border-color: var(--ylnmn-blue);
+            box-shadow: 0 0 0 3px rgba(49,72,122,0.12);
+            background: #fff;
+        }
+
+        .select-arrow {
+            position: absolute;
+            left: 14px; top: 50%;
+            transform: translateY(-50%);
+            pointer-events: none;
+            font-size: 16px;
+            color: var(--ylnmn-blue);
+        }
+
+        /* ===== FORM FIELDS ===== */
+        .form-group { margin-bottom: 20px; }
+
+        .form-group label {
+            display: block; font-size: 14px; font-weight: 700;
+            color: var(--space-cadet); margin-bottom: 7px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 13px 16px;
+            border: 1.5px solid rgba(49,72,122,0.25);
+            border-radius: 12px;
+            font-family: 'Cairo', sans-serif; font-size: 15px;
+            color: var(--oxford-blue); background: var(--lavender);
+            outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+
+        .form-group input::placeholder { color: #8fa8c8; }
+
+        .form-group input:focus {
+            border-color: var(--ylnmn-blue);
+            box-shadow: 0 0 0 3px rgba(49,72,122,0.12);
+            background: #fff;
+        }
+
+        .form-group input.input-error {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231,76,60,0.12);
+        }
+
+        .form-group input:disabled {
+            opacity: 0.5; cursor: not-allowed;
+        }
+
+        .password-wrapper { position: relative; }
+
+        .toggle-pass {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            font-size: 17px; color: var(--ylnmn-blue);
+            padding: 0; display: flex; align-items: center;
+        }
+
+        .forgot-link {
+            display: block; text-align: left;
+            font-size: 13px; color: var(--ylnmn-blue);
+            text-decoration: none; margin-top: 6px; font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .forgot-link:hover { color: var(--oxford-blue); }
+
+        /* ===== ATTEMPT COUNTER ===== */
+        .attempt-warning {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: #fff8e1;
+            border: 1.5px solid #f59e0b;
+            border-radius: 12px;
+            padding: 11px 15px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #92400e;
+        }
+
+        .attempt-warning.show { display: flex; }
+
+        .attempt-warning .warn-icon { font-size: 18px; flex-shrink: 0; }
+
+        .attempt-bar-wrap {
+            height: 5px;
+            background: rgba(245,158,11,0.2);
+            border-radius: 10px;
+            margin-top: 7px;
+            overflow: hidden;
+        }
+
+        .attempt-bar {
+            height: 100%;
+            border-radius: 10px;
+            background: #f59e0b;
+            transition: width 0.4s ease, background 0.4s;
+        }
+
+        /* ===== LOCKOUT BANNER ===== */
+        .lockout-banner {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: #fef2f2;
+            border: 2px solid #ef4444;
+            border-radius: 14px;
+            padding: 18px 16px;
+            margin-bottom: 18px;
+            text-align: center;
+        }
+
+        .lockout-banner.show { display: flex; }
+
+        .lockout-banner .lock-icon { font-size: 30px; }
+
+        .lockout-banner strong {
+            color: #991b1b;
+            font-size: 15px; font-weight: 800;
+        }
+
+        .lockout-banner p {
+            color: #b91c1c;
+            font-size: 13px; line-height: 1.6;
+        }
+
+        .lockout-timer {
+            font-size: 24px; font-weight: 800;
+            color: #ef4444;
+            letter-spacing: 2px;
+        }
+
+        /* ===== SUBMIT BTN ===== */
+        .btn-submit {
+            width: 100%; padding: 14px;
+            border: none; border-radius: 12px;
+            background: linear-gradient(135deg, var(--ylnmn-blue), var(--space-cadet));
+            color: white;
+            font-family: 'Cairo', sans-serif;
+            font-size: 16px; font-weight: 800;
+            cursor: pointer; transition: all 0.3s;
+            margin-top: 8px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            background: linear-gradient(135deg, var(--space-cadet), var(--oxford-blue));
+            transform: translateY(-2px);
+            box-shadow: 0 10px 28px rgba(49,72,122,0.4);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.45; cursor: not-allowed; transform: none;
+        }
+
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 22px 0 18px; color: #aab; font-size: 13px;
+        }
+
+        .divider::before, .divider::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(49,72,122,0.18);
+        }
+
+        .signup-prompt { text-align: center; font-size: 14px; color: var(--space-cadet); }
+
+        .signup-prompt a {
+            color: var(--ylnmn-blue); font-weight: 800;
+            text-decoration: none; transition: color 0.3s;
+        }
+
+        .signup-prompt a:hover { color: var(--oxford-blue); }
+
+        .footer-text { text-align: center; margin-top: 20px; font-size: 12px; color: #8fa8c8; }
+
+        /* ===== SCROLL TOP ===== */
+        .scroll-top {
+            position: fixed; bottom: 36px; left: 36px;
+            width: 50px; height: 50px;
+            background: var(--ylnmn-blue); color: white;
+            border: none; border-radius: 50%; font-size: 22px;
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(49,72,122,0.45);
+            opacity: 0; transform: translateY(20px);
+            transition: opacity 0.35s, transform 0.35s, background 0.3s;
+            z-index: 999; pointer-events: none;
+        }
+
+        .scroll-top.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .scroll-top:hover { background: var(--jordy-blue); color: var(--oxford-blue); transform: translateY(-4px); }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            background: #0f1825;
+            padding: 70px 60px 0;
+            border-top: 1px solid rgba(143,179,226,0.10);
+            position: relative; z-index: 2;
+        }
+
+        .footer-top {
+            max-width: 1200px; margin: 0 auto;
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 48px; padding-bottom: 52px;
+            border-bottom: 1px solid rgba(143,179,226,0.10);
+        }
+
+        .footer-brand p { color: #6a82a8; font-size: 14px; line-height: 1.85; margin-bottom: 24px; }
+
+        .footer-logo-row { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+
+        .footer-logo-row img {
+            width: 46px; height: 46px; border-radius: 50%;
+            object-fit: cover; border: 2px solid rgba(143,179,226,0.3);
+        }
+
+        .footer-logo-row .brand-name { color: var(--lavender); font-size: 17px; font-weight: 800; line-height: 1.3; }
+        .footer-logo-row .brand-name span { display: block; color: var(--jordy-blue); font-size: 13px; font-weight: 600; }
+
+        .footer-socials { display: flex; gap: 10px; }
+
+        .social-btn {
+            width: 38px; height: 38px;
+            background: rgba(49,72,122,0.4); border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            border: 1px solid rgba(143,179,226,0.12);
+            cursor: pointer; transition: all 0.3s; text-decoration: none;
+        }
+
+        .social-btn:hover { background: var(--ylnmn-blue); border-color: var(--ylnmn-blue); transform: translateY(-3px); }
+
+        .footer-column h4 {
+            color: var(--lavender); font-size: 15px; font-weight: 700;
+            margin-bottom: 22px; position: relative; padding-bottom: 12px;
+        }
+
+        .footer-column h4::after {
+            content: ''; position: absolute;
+            bottom: 0; right: 0; width: 30px; height: 2px;
+            background: var(--ylnmn-blue); border-radius: 2px;
+        }
+
+        .footer-column a {
+            display: flex; align-items: center; gap: 8px;
+            color: #6a82a8; text-decoration: none;
+            font-size: 14px; margin-bottom: 13px;
+            transition: color 0.3s, gap 0.3s;
+        }
+
+        .footer-column a::before { content: '›'; font-size: 18px; color: var(--ylnmn-blue); font-weight: 700; }
+        .footer-column a:hover { color: var(--lavender); gap: 12px; }
+
+        .footer-contact-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 16px; }
+
+        .footer-contact-item .fc-icon {
+            width: 32px; height: 32px;
+            background: rgba(49,72,122,0.4); border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; flex-shrink: 0;
+            border: 1px solid rgba(143,179,226,0.10);
+        }
+
+        .footer-contact-item p { color: #6a82a8; font-size: 13px; line-height: 1.65; }
+        .footer-contact-item strong { color: #b8cce8; font-size: 13px; font-weight: 700; display: block; margin-bottom: 2px; }
+
+        .footer-bottom {
+            max-width: 1200px; margin: 0 auto;
+            padding: 24px 0;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        .footer-bottom p { color: #4a5e7a; font-size: 13px; }
+
+        .footer-bottom-links { display: flex; gap: 24px; }
+
+        .footer-bottom-links a { color: #4a5e7a; text-decoration: none; font-size: 13px; transition: color 0.3s; }
+        .footer-bottom-links a:hover { color: var(--jordy-blue); }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 992px) {
+            .nav-links { display: none; }
+            .hamburger { display: flex; }
+            .page-left { display: none; }
+            .page-right { width: 100%; padding: 100px 30px 60px; }
+            .footer-top { grid-template-columns: 1fr 1fr; }
+        }
+
+        @media (max-width: 576px) {
+            .navbar { padding: 0 20px; }
+            .page-right { padding: 100px 20px 60px; }
+            .login-card { padding: 32px 24px; }
+            .footer { padding: 40px 20px 0; }
+            .footer-top { grid-template-columns: 1fr; gap: 30px; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar" id="navbar">
+        <a href="index.html" class="logo">
+            <img src="./images/Logo.jpeg" alt="الشعار">
+        </a>
+        <ul class="nav-links">
+            <li><a href="index.html">الرئيسية</a></li>
+            <li><a href="./Courses-Centers.html">الكورسات</a></li>
+            <li><a href="index.html#contact">تواصل معنا</a></li>
+        </ul>
+        <div class="nav-right">
+            <a href="./Login.html" class="btn-login-nav active">تسجيل الدخول</a>
+            <div class="hamburger" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN PAGE -->
+    <div class="page-wrapper">
+        <div class="page-bg"></div>
+        <div class="page-overlay"></div>
+
+        <div class="page-left">
+            <h1>مرحباً بك في<br><span>نظام الحجز</span></h1>
+            <p>سجّل دخولك للوصول إلى الكورسات التدريبية المتخصصة. احجز مقعدك الآن بكل سهولة.</p>
+            <div class="badges">
+                <div class="badge-pill">🎓 كورسات متخصصة</div>
+                <div class="badge-pill">📅 حجز سريع</div>
+                <div class="badge-pill">✅ مقاعد محدودة</div>
+            </div>
+        </div>
+
+        <div class="page-right">
+            <div class="login-card">
+                <h2>تسجيل الدخول</h2>
+                <p class="subtitle">أهلاً بعودتك — اختر نوع حسابك وادخل بياناتك</p>
+
+                <!-- LOCKOUT BANNER -->
+                <div class="lockout-banner" id="lockoutBanner">
+                    <span class="lock-icon">🔒</span>
+                    <strong>تم تعليق الحساب مؤقتاً</strong>
+                    <p>لقد تجاوزت الحد المسموح به من المحاولات الخاطئة.<br>يرجى الانتظار قبل المحاولة مجدداً.</p>
+                    <div class="lockout-timer" id="lockTimer">02:00</div>
+                </div>
+
+                <!-- ATTEMPT WARNING -->
+                <div class="attempt-warning" id="attemptWarning">
+                    <span class="warn-icon">⚠️</span>
+                    <div style="flex:1">
+                        <span id="attemptText">تنبيه: لديك محاولات متبقية قبل الحظر المؤقت.</span>
+                        <div class="attempt-bar-wrap">
+                            <div class="attempt-bar" id="attemptBar" style="width:0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ROLE DROPDOWN -->
+                <div class="role-group">
+                    <label>نوع الحساب</label>
+                    <div class="custom-select-wrapper">
+                        <select id="roleSelect" onchange="onRoleChange()">
+                            <option value="student">🎓 طالب</option>
+                            <option value="admin">🛡️ أدمن</option>
+                        </select>
+                        <span class="select-arrow">▾</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="emailLabel">البريد الإلكتروني / الرقم الجامعي</label>
+                    <input type="text" id="emailInput" placeholder="أدخل بريدك أو رقمك الجامعي">
+                </div>
+
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="passInput" placeholder="أدخل كلمة المرور">
+                        <button class="toggle-pass" onclick="togglePass()" title="إظهار/إخفاء">👁</button>
+                    </div>
+                    <a href="./Forgetpassword.html" class="forgot-link">نسيت كلمة المرور؟</a>
+                </div>
+
+                <button class="btn-submit" id="submitBtn" onclick="handleLogin()">دخول ←</button>
+
+                <div class="divider">أو</div>
+
+                <div class="signup-prompt">
+                    ليس لديك حساب؟ <a href="./Signup.html">إنشاء حساب جديد</a>
+                </div>
+
+                <div class="footer-text">Smart Course Booking Platform © 2026</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="footer-top">
+            <div class="footer-brand">
+                <div class="footer-logo-row">
+                    <img src="./images/Logo.jpeg" alt="الشعار">
+                    <div class="brand-name">
+                        منصة الكورسات الذكية
+                        <span>Smart Course Booking</span>
+                    </div>
+                </div>
+                <p>منصة تدريبية متكاملة تهدف إلى تمكين الطلاب وتزويدهم بالأدوات العملية اللازمة للنجاح في سوق العمل.</p>
+                <div class="footer-socials">
+                    <a class="social-btn" href="#">📘</a>
+                    <a class="social-btn" href="#">📸</a>
+                    <a class="social-btn" href="#">💬</a>
+                    <a class="social-btn" href="#">▶️</a>
+                </div>
+            </div>
+
+            <div class="footer-column">
+                <h4>روابط سريعة</h4>
+                <a href="index.html">الرئيسية</a>
+                <a href="./Courses-Centers.html">الكورسات</a>
+                <a href="index.html#contact">تواصل معنا</a>
+                <a href="./login.html">تسجيل الدخول</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>المراكز التدريبية</h4>
+                <a href="./Courses.html">UICC - ربط الجامعة بالصناعة</a>
+                <a href="./Courses.html">UCCD - التطوير المهني</a>
+            </div>
+
+            <div class="footer-column">
+                <h4>تواصل معنا</h4>
+                <div class="footer-contact-item">
+                    <div class="fc-icon">📧</div>
+                    <div><strong>البريد الإلكتروني</strong><p>support@platform.edu.eg</p></div>
+                </div>
+                <div class="footer-contact-item">
+                    <div class="fc-icon">📞</div>
+                    <div><strong>الهاتف</strong><p>+20 123 456 7890</p></div>
+                </div>
+                <div class="footer-contact-item">
+                    <div class="fc-icon">🕐</div>
+                    <div><strong>ساعات العمل</strong><p>الأحد – الخميس: 9 ص – 5 م</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>© 2026 Smart Course Booking Platform. جميع الحقوق محفوظة.</p>
+            <div class="footer-bottom-links">
+                <a href="#">سياسة الخصوصية</a>
+                <a href="#">شروط الاستخدام</a>
+                <a href="#">الأسئلة الشائعة</a>
+            </div>
+        </div>
+    </footer>
+
+    <button class="scroll-top" id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+    <script>
+        // ===== NAVBAR SCROLL =====
+        window.addEventListener('scroll', () => {
+            document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 50);
+            document.getElementById('scrollTop').classList.toggle('visible', window.scrollY > 300);
+        });
+
+        function toggleMenu() {
+            const nl = document.querySelector('.nav-links');
+            nl.style.display = nl.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        function togglePass() {
+            const inp = document.getElementById('passInput');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        }
+
+        function onRoleChange() {
+            const role = document.getElementById('roleSelect').value;
+            const emailLabel = document.getElementById('emailLabel');
+            const emailInput = document.getElementById('emailInput');
+            if (role === 'admin') {
+                emailLabel.textContent = 'اسم المستخدم';
+                emailInput.placeholder = 'أدخل اسم المستخدم الخاص بك';
+            } else {
+                emailLabel.textContent = 'البريد الإلكتروني / الرقم الجامعي';
+                emailInput.placeholder = 'أدخل بريدك أو رقمك الجامعي';
+            }
+        }
+
+        // ===== LOGIN ATTEMPT LOGIC =====
+        const MAX_ATTEMPTS = 5;
+        const LOCKOUT_SECONDS = 120; // 2 minutes
+
+        let attempts = parseInt(sessionStorage.getItem('loginAttempts') || '0');
+        let lockedUntil = parseInt(sessionStorage.getItem('lockedUntil') || '0');
+        let lockInterval = null;
+
+        // On page load, restore state
+        window.addEventListener('DOMContentLoaded', () => {
+            if (lockedUntil && Date.now() < lockedUntil) {
+                activateLockout(false); // restore lockout without resetting timer
+            } else if (lockedUntil && Date.now() >= lockedUntil) {
+                clearLockout();
+            }
+            updateWarningUI();
+        });
+
+        function handleLogin() {
+            // Re-check lockout on every click
+            if (lockedUntil && Date.now() < lockedUntil) {
+                return;
+            }
+
+            const email = document.getElementById('emailInput').value.trim();
+            const pass  = document.getElementById('passInput').value.trim();
+            const role  = document.getElementById('roleSelect').value; // جلب نوع الحساب المختار
+
+            if (!email || !pass) {
+                alert('من فضلك أدخل جميع البيانات المطلوبة');
+                return;
+            }
+
+            // محاكاة نجاح تسجيل الدخول لتجربة التوجيه (قم بتغييرها إلى false لاختبار الحظر)
+            const isCorrect = true; 
+
+            if (isCorrect) {
+                clearLockout();
+                alert('تم تسجيل الدخول بنجاح!');
+                
+                // التوجيه الشرطي حسب القيمة المختارة في الـ Select
+                if (role === 'admin') {
+                    window.location.href = 'admin.html'; // اسم صفحة لوحة تحكم الأدمن
+                } else {
+                    window.location.href = 'Courses.html'; // اسم صفحة الطالب
+                }
+            } else {
+                attempts++;
+                sessionStorage.setItem('loginAttempts', attempts);
+
+                if (attempts >= MAX_ATTEMPTS) {
+                    const until = Date.now() + LOCKOUT_SECONDS * 1000;
+                    sessionStorage.setItem('lockedUntil', until);
+                    lockedUntil = until;
+                    activateLockout(true);
+                } else {
+                    document.getElementById('passInput').classList.add('input-error');
+                    updateWarningUI();
+                }
+            }
+        }
+
+        function updateWarningUI() {
+            const warning = document.getElementById('attemptWarning');
+            const bar     = document.getElementById('attemptBar');
+            const text    = document.getElementById('attemptText');
+
+            if (attempts > 0 && attempts < MAX_ATTEMPTS && !lockedUntil) {
+                const remaining = MAX_ATTEMPTS - attempts;
+                const pct = (attempts / MAX_ATTEMPTS) * 100;
+
+                warning.classList.add('show');
+                text.textContent = `⚠️ كلمة المرور خاطئة — لديك ${remaining} محاولة متبقية فقط قبل الحظر المؤقت.`;
+                bar.style.width = pct + '%';
+
+                // Color shift as danger increases
+                if (pct >= 80) {
+                    bar.style.background = '#ef4444';
+                } else if (pct >= 60) {
+                    bar.style.background = '#f97316';
+                } else {
+                    bar.style.background = '#f59e0b';
+                }
+            } else {
+                warning.classList.remove('show');
+            }
+        }
+
+        function activateLockout(resetTimer) {
+            const banner    = document.getElementById('lockoutBanner');
+            const submitBtn = document.getElementById('submitBtn');
+            const emailInp  = document.getElementById('emailInput');
+            const passInp   = document.getElementById('passInput');
+            const warning   = document.getElementById('attemptWarning');
+
+            banner.classList.add('show');
+            warning.classList.remove('show');
+            submitBtn.disabled = true;
+            emailInp.disabled  = true;
+            passInp.disabled   = true;
+
+            if (lockInterval) clearInterval(lockInterval);
+
+            lockInterval = setInterval(() => {
+                const remaining = Math.max(0, Math.ceil((lockedUntil - Date.now()) / 1000));
+                const m = String(Math.floor(remaining / 60)).padStart(2, '0');
+                const s = String(remaining % 60).padStart(2, '0');
+                document.getElementById('lockTimer').textContent = `${m}:${s}`;
+
+                if (remaining <= 0) {
+                    clearInterval(lockInterval);
+                    clearLockout();
+                }
+            }, 500);
+        }
+
+        function clearLockout() {
+            attempts = 0;
+            lockedUntil = 0;
+            sessionStorage.removeItem('loginAttempts');
+            sessionStorage.removeItem('lockedUntil');
+
+            const banner    = document.getElementById('lockoutBanner');
+            const submitBtn = document.getElementById('submitBtn');
+            const emailInp  = document.getElementById('emailInput');
+            const passInp   = document.getElementById('passInput');
+
+            banner.classList.remove('show');
+            submitBtn.disabled = false;
+            emailInp.disabled  = false;
+            passInp.disabled   = false;
+
+            document.getElementById('passInput').classList.remove('input-error');
+            document.getElementById('attemptWarning').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
